@@ -27,6 +27,10 @@ NEW = re.compile(r"(?:new[-_/](?:vehicles?|cars?|inventory|auto)|(?:vehicles?|ca
 USED = re.compile(r"(?:used[-_/](?:vehicles?|cars?|inventory|auto)|pre[-_]?owned[-_/](?:vehicles?|inventory|cars?)|(?:vehicles?|cars?)[-_/]used|inventory[-_/]used|searchused|search[-_/]used|[?&](?:type|condition)=used\b)", re.I)
 NEW_LABEL = re.compile(r"\b(?:new (?:vehicles?|cars?|inventory)|shop new|browse new|view new)\b", re.I)
 USED_LABEL = re.compile(r"\b(?:used (?:vehicles?|cars?|inventory)|pre[- ]owned (?:vehicles?|cars?|inventory)|shop used|browse used|view used)\b", re.I)
+# Require explicit lease wording; generic specials, financing, and service offers are not lease pages.
+LEASE = re.compile(r"(?:lease[-_/]?(?:specials?|offers?|deals?|incentives?)|(?:specials?|offers?|deals?|incentives?)[-_/]?lease|[?&](?:offer|special|type)=lease\b)", re.I)
+LEASE_LABEL = re.compile(r"\b(?:lease (?:specials?|offers?|deals?|incentives?)|(?:specials?|offers?|deals?|incentives?) (?:on )?leases?|current lease (?:offers?|deals?)|leasing (?:specials?|offers?|deals?))\b", re.I)
+LEASE_BAD = re.compile(r"(?:service|parts|maintenance|coupon|privacy|/vdp/|/vin/|/vehicle-details/|finance[-_/]?application|credit[-_/]?application)", re.I)
 EXCLUDE = re.compile(r"(?:specials|offers|incentives|service|parts|appointment|finance|lease|privacy|coupon|rebate|trade[-_]?in|certified[-_]?only|/vdp/|/vin/|/vehicle-details/)", re.I)
 RETRYABLE = {"homepage_error", "robots_unavailable", "fetch_error", "homepage_blocked"}
 ROBOTS = {}
@@ -150,6 +154,10 @@ def fetch(url, max_bytes=1200000):
 
 def score(url, label, kind):
     path = urllib.parse.urlsplit(url).path + "?" + urllib.parse.urlsplit(url).query
+    if kind == "lease":
+        if LEASE_BAD.search(path):
+            return 0
+        return 8 * bool(LEASE.search(path)) + 5 * bool(LEASE_LABEL.search(label))
     if EXCLUDE.search(path):
         return 0
     if kind == "new":
@@ -169,7 +177,7 @@ def links(html, base):
         if not u or not same_site(base, u):
             continue
         label = a.get_text(" ", strip=True)[:150]
-        if max(score(u, label, "new"), score(u, label, "used")) >= 5:
+        if max(score(u, label, "new"), score(u, label, "used"), score(u, label, "lease")) >= 5:
             out.append((u, label, "homepage navigation"))
     return out
 
@@ -184,7 +192,7 @@ def sitemap_links(base):
         tree = ET.fromstring(xml)
         locs = [e.text.strip() for e in tree.iter() if e.tag.endswith("loc") and e.text]
         urls = [x for x in locs if not x.lower().endswith(".xml")]
-        maps = [x for x in locs if x.lower().endswith(".xml") and re.search("inventory|vehicle|page", x, re.I)][:2]
+        maps = [x for x in locs if x.lower().endswith(".xml") and re.search("inventory|vehicle|page|lease|special|offer", x, re.I)][:2]
         for child in maps:
             if not url_clean(child) or not same_site(base, child):
                 continue
@@ -213,6 +221,10 @@ def page_ok(html, url, kind):
     title = " ".join(e.get_text(" ", strip=True) for e in soup.find_all(["title", "h1"], limit=5))
     if re.search(r"404|page not found|domain for sale|website for sale|access denied", title, re.I):
         return False
+    if kind == "lease":
+        # A verified page must be explicitly lease-focused; a generic "Specials" page is insufficient.
+        return bool(LEASE.search(url) and (LEASE_LABEL.search(title) or re.search(r"\blease\b", title, re.I))
+                    or LEASE_LABEL.search(title))
     return score(url, title, kind) >= 7 or bool((NEW_LABEL if kind == "new" else USED_LABEL).search(title))
 
 
@@ -224,15 +236,18 @@ class Result:
     status: str = "fetch_error"
     new: str = ""
     used: str = ""
+    lease: str = ""
     new_evidence: str = ""
     used_evidence: str = ""
+    lease_evidence: str = ""
     final_home: str = ""
     notes: str = ""
 
     def audit(self):
         return [str(self.number), self.row.get("Source ID", ""), self.row.get("Dealership", ""),
                 self.row.get("Website", ""), self.checked, self.status, self.new, self.used,
-                self.new_evidence, self.used_evidence, self.final_home, self.notes]
+                self.new_evidence, self.used_evidence, self.final_home, self.notes,
+                self.lease, self.lease_evidence, self.checked]
 
 
 def inspect(number, row):
@@ -248,10 +263,13 @@ def inspect(number, row):
             out.status = "redirect_mismatch"
             return out
         found = links(html, actual)
-        if not any(score(u, label, "new") for u, label, _ in found) or not any(score(u, label, "used") for u, label, _ in found):
+        if any(not row.get(column) and not any(score(u, label, kind) for u, label, _ in found)
+               for column, kind in (("New Inventory URL", "new"), ("Used Inventory URL", "used"),
+                                    ("Lease Specials URL", "lease"))):
             found.extend(sitemap_links(actual))
-        for kind in ("new", "used"):
-            if row.get("New Inventory URL" if kind == "new" else "Used Inventory URL"):
+        for kind in ("new", "used", "lease"):
+            column = {"new": "New Inventory URL", "used": "Used Inventory URL", "lease": "Lease Specials URL"}[kind]
+            if row.get(column):
                 continue
             candidates = sorted(((score(u, label, kind), u, evidence) for u, label, evidence in found
                                  if score(u, label, kind) >= 5), reverse=True)
@@ -268,8 +286,10 @@ def inspect(number, row):
                     if same_site(actual, final) and page_ok(content, final, kind):
                         if kind == "new":
                             out.new, out.new_evidence = final, evidence + "; live category page"
-                        else:
+                        elif kind == "used":
                             out.used, out.used_evidence = final, evidence + "; live category page"
+                        else:
+                            out.lease, out.lease_evidence = final, evidence + "; live lease specials page"
                         break
                 except FetchError:
                     continue
@@ -278,7 +298,7 @@ def inspect(number, row):
             out.notes = "New and used resolved to same URL"
         has_new = bool(row.get("New Inventory URL") or out.new)
         has_used = bool(row.get("Used Inventory URL") or out.used)
-        out.status = "found_both" if has_new and has_used else "found_new_only" if has_new else "found_used_only" if has_used else "no_matching_links"
+        out.status = "found_both" if has_new and has_used else "found_new_only" if has_new else "found_used_only" if has_used else "found_lease_only" if (row.get("Lease Specials URL") or out.lease) else "no_matching_links"
     except RobotsBlocked as exc:
         out.status, out.notes = "robots_blocked", str(exc)
     except FetchError as exc:
@@ -324,7 +344,10 @@ class Sheets:
                       json={"values": rows})
 
 
-def eligible(number, row, history, now):
+def eligible(number, row, history, now, lease_checked=False):
+    # Backfill previously researched dealers after lease support is introduced.
+    if not row.get("Lease Specials URL") and not lease_checked:
+        return True
     if row.get("New Inventory URL") and row.get("Used Inventory URL"):
         return False
     past = history.get(number, [])

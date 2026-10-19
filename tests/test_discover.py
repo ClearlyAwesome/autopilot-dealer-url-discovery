@@ -47,8 +47,8 @@ class TestDiscovery(unittest.TestCase):
         row = {"New Inventory URL": "", "Used Inventory URL": ""}
         self.assertTrue(eligible(2, row, {}, now))
         self.assertFalse(eligible(2, {"New Inventory URL": "a", "Used Inventory URL": "b", "Lease Specials URL": "c"}, {}, now, lease_checked=True))
-        self.assertFalse(eligible(2, row, {2: [("2026-10-18T00:00:00+00:00", "homepage_error")]}, now))
-        self.assertTrue(eligible(2, row, {2: [("2026-10-10T00:00:00+00:00", "homepage_error")]}, now))
+        self.assertFalse(eligible(2, row, {2: [("2026-10-18T00:00:00+00:00", "homepage_error")]}, now, lease_checked=True))
+        self.assertTrue(eligible(2, row, {2: [("2026-10-10T00:00:00+00:00", "homepage_error")]}, now, lease_checked=True))
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,9 +13,10 @@ from discover import inspect, eligible, now_utc
 
 FIELDS = ["Sheet Row", "Source ID", "Dealership", "Website", "Checked At UTC", "Status",
           "New Inventory URL", "Used Inventory URL", "New Evidence", "Used Evidence",
-          "Final Homepage", "Notes"]
+          "Final Homepage", "Notes", "Lease Specials URL", "Lease Evidence", "Lease Checked At UTC"]
 RESULT_FIELDS = ["Sheet Row", "Source ID", "Dealership", "Website", "New Inventory URL",
-                 "Used Inventory URL", "New Evidence", "Used Evidence", "Checked At UTC", "Status"]
+                 "Used Inventory URL", "Lease Specials URL", "New Evidence", "Used Evidence",
+                 "Lease Evidence", "Checked At UTC", "Status", "Lease Checked At UTC"]
 
 
 def read_csv(path):
@@ -66,15 +67,21 @@ def main():
         if x.get("Sheet Row", "").isdigit():
             history[int(x["Sheet Row"])].append((x.get("Checked At UTC"), x.get("Status")))
 
+    lease_checked = set()
+    for entry in audit:
+        if entry.get("Sheet Row", "").isdigit() and entry.get("Lease Checked At UTC"):
+            lease_checked.add(int(entry["Sheet Row"]))
     for number, row in rows:
         if number in by_row:
             old = by_row[number]
-            for col in ("New Inventory URL", "Used Inventory URL"):
+            for col in ("New Inventory URL", "Used Inventory URL", "Lease Specials URL"):
                 if old.get(col):
                     row[col] = old[col]
     now = now_utc()
-    todo = [(number, row) for number, row in rows if eligible(number, row, history, now)]
-    todo.sort(key=lambda item: (item[0] in history, item[0]))
+    todo = [(number, row) for number, row in rows
+            if eligible(number, row, history, now, lease_checked=number in lease_checked)]
+    # Revisit previously researched dealerships first, then continue the nationwide directory.
+    todo.sort(key=lambda item: (item[0] not in history, item[0]))
     selected = todo[:min(250, max(1, args.batch_size))]
     checked = []
     with ThreadPoolExecutor(max_workers=min(10, max(1, args.workers))) as pool:
@@ -83,23 +90,28 @@ def main():
             result = future.result()
             checked.append(result)
             print(f"Row {result.number}: {result.status}", flush=True)
-    count_new = count_used = 0
+    count_new = count_used = count_lease = 0
     for result in checked:
         number = result.number
         prior = by_row.get(number, {})
         row = result.row
         new = prior.get("New Inventory URL") or row.get("New Inventory URL") or result.new
         used = prior.get("Used Inventory URL") or row.get("Used Inventory URL") or result.used
+        lease = prior.get("Lease Specials URL") or row.get("Lease Specials URL") or result.lease
+        count_lease += bool(result.lease and not prior.get("Lease Specials URL") and not row.get("Lease Specials URL"))
         count_new += bool(result.new and not prior.get("New Inventory URL") and not row.get("New Inventory URL"))
         count_used += bool(result.used and not prior.get("Used Inventory URL") and not row.get("Used Inventory URL"))
-        if result.new or result.used:
+        if result.new or result.used or result.lease or prior:
             by_row[number] = {
                 "Sheet Row": str(number), "Source ID": row.get("Source ID", ""),
                 "Dealership": row.get("Dealership", ""), "Website": row.get("Website", ""),
                 "New Inventory URL": new, "Used Inventory URL": used,
+                "Lease Specials URL": lease,
                 "New Evidence": result.new_evidence or prior.get("New Evidence", ""),
                 "Used Evidence": result.used_evidence or prior.get("Used Evidence", ""),
-                "Checked At UTC": result.checked, "Status": result.status
+                "Lease Evidence": result.lease_evidence or prior.get("Lease Evidence", ""),
+                "Checked At UTC": result.checked, "Status": result.status,
+                "Lease Checked At UTC": result.checked
             }
     audit.extend(dict(zip(FIELDS, result.audit())) for result in sorted(checked, key=lambda x: x.number))
     write_csv("results/audit.csv", FIELDS, audit)
@@ -110,6 +122,9 @@ def main():
     base_used = sum(bool(row.get("Used Inventory URL")) for _, row in rows)
     new_count = base_new + sum(bool(x.get("New Inventory URL")) and not dict(rows)[int(x["Sheet Row"])].get("New Inventory URL") for x in by_row.values())
     used_count = base_used + sum(bool(x.get("Used Inventory URL")) and not dict(rows)[int(x["Sheet Row"])].get("Used Inventory URL") for x in by_row.values())
+    lease_count = sum(bool(row.get("Lease Specials URL")) for _, row in rows) + sum(
+        bool(x.get("Lease Specials URL")) and not dict(rows)[int(x["Sheet Row"])].get("Lease Specials URL")
+        for x in by_row.values())
     both_count = base_both + sum(
         bool(x.get("New Inventory URL") or dict(rows)[int(x["Sheet Row"])].get("New Inventory URL"))
         and bool(x.get("Used Inventory URL") or dict(rows)[int(x["Sheet Row"])].get("Used Inventory URL"))
@@ -122,8 +137,10 @@ def main():
         "attempts_to_date": len(audit),
         "new_urls_added_this_run": count_new,
         "used_urls_added_this_run": count_used,
+        "lease_urls_added_this_run": count_lease,
         "new_urls_total": new_count,
         "used_urls_total": used_count,
+        "lease_urls_total": lease_count,
         "dealerships_with_both_urls": both_count,
         "remaining_to_research": len(todo) - len(selected),
         "status_counts": dict(Counter(r.status for r in checked)),
@@ -138,10 +155,12 @@ def main():
         f"- Dealerships with both URLs: **{both_count:,}**\n"
         f"- New inventory URLs: **{new_count:,}**\n"
         f"- Used inventory URLs: **{used_count:,}**\n"
+        f"- Lease specials URLs: **{lease_count:,}**\n"
         f"- Dealerships checked this run: **{len(checked)}**\n"
         f"- Total checks logged: **{len(audit):,}**\n"
         f"- New links found this run: **{count_new}**\n"
-        f"- Used links found this run: **{count_used}**\n\n"
+        f"- Used links found this run: **{count_used}**\n"
+        f"- Lease specials links found this run: **{count_lease}**\n\n"
         "Results: [discovered URLs](discoveries.csv) · [audit](audit.csv)\n\n"
         "Results are stored in GitHub. Google Sheets synchronization is not enabled.\n",
         encoding="utf-8"

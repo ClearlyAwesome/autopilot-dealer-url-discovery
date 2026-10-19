@@ -11,7 +11,7 @@ on:
         default: '100'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: autopilot-dealer-inventory-discovery
@@ -20,11 +20,11 @@ concurrency:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      HAS_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON != '' }}
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -35,21 +35,26 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_*.py' -v
         env:
           PYTHONPATH: ${{ github.workspace }}/src
-      - name: Discover URLs and update Google Sheet
-        if: ${{ env.HAS_SHEETS_CREDENTIALS == 'true' }}
-        run: python src/discover.py --batch-size "$BATCH_SIZE" --workers 8 --report run-report.json
+      - name: Research dealership URLs
+        run: python src/repo_worker.py --batch-size "$BATCH_SIZE" --workers 6
         env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          SPREADSHEET_ID: 1tGBSFp-bxhW1_uocOU0uBinXtPos-TKPJLyNDmrNrX0
           BATCH_SIZE: ${{ github.event.inputs.batch_size || '100' }}
-      - name: Explain missing credential
-        if: ${{ env.HAS_SHEETS_CREDENTIALS != 'true' }}
-        run: echo 'Google Sheets service account is not configured. Add GOOGLE_SERVICE_ACCOUNT_JSON and share the Sheet with that account.'
-      - name: Upload non-secret run summary
+      - name: Save research results to GitHub
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update dealership inventory URL discoveries'
+            git push
+          else
+            echo 'No new research results to save.'
+          fi
+      - name: Upload summary
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: discovery-report-${{ github.run_number }}
-          path: run-report.json
+          path: results/progress.json
           if-no-files-found: ignore
           retention-days: 30

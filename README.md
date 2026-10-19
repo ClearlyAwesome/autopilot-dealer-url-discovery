@@ -1,35 +1,40 @@
-# Auto Pilot — Nationwide Inventory URL Discovery
+# Auto Pilot — automated dealership inventory URL research
 
-This repository is **separate from Auto Pilot production**. It researches the existing [19,169-dealership Google Sheet](https://docs.google.com/spreadsheets/d/1tGBSFp-bxhW1_uocOU0uBinXtPos-TKPJLyNDmrNrX0/edit) in small batches using public dealership websites. It does not scrape vehicle inventory records, use Scrape.do, or charge an API.
+**No Google Cloud setup. No API key. No paid scraping credits.**
 
-## How it works
+This repository is separate from the Auto Pilot production app. It contains a snapshot of all **19,169 dealerships** from the [Auto Pilot dealership Google Sheet](https://docs.google.com/spreadsheets/d/1tGBSFp-bxhW1_uocOU0uBinXtPos-TKPJLyNDmrNrX0/edit), including existing new and used inventory links.
 
-GitHub Actions runs a batch automatically every six hours (100 dealerships per run by default). The Python worker reads the live directory, skips rows with both URLs, visits official websites, checks robots.txt, inspects navigation and sitemaps, and verifies candidate new/used inventory pages. It writes new discoveries only to the empty cells in columns D and E. It appends a per-dealer result to **Discovery Audit** and updates **Discovery Progress** in the same Sheet. Unresolved/blocked sites remain blank; URLs are never invented.
+## Automatic operation
 
-## Required one-time credential setup
+The [GitHub Actions workflow](../../actions/workflows/discover.yml) is scheduled **every six hours**, checking up to **100 dealerships per run**. It visits dealer homepages, follows official inventory navigation and sitemaps, respects robots.txt, and only saves new/used category pages it can reach and classify. It does not scrape vehicle listings, invent URLs, or modify production Auto Pilot.
 
-1. In Google Cloud Console, create or select a project. Enable **Google Sheets API** and create a dedicated **service account**. Generate a JSON key for this service account.
-2. Open the [target Google Sheet](https://docs.google.com/spreadsheets/d/1tGBSFp-bxhW1_uocOU0uBinXtPos-TKPJLyNDmrNrX0/edit) → Share → add the service account's `client_email` as **Editor**.
-3. In this GitHub repository → **Settings → Secrets and variables → Actions → New repository secret**. Name it `GOOGLE_SERVICE_ACCOUNT_JSON` and paste the full JSON key. **Never put this key in code, issues, chats, or the Sheet.**
-4. Go to **Actions → Auto Pilot inventory URL discovery → Run workflow**, choose batch size **5** for the first smoke test, and check the run log plus the Sheet's **Discovery Audit** and **Discovery Progress** tabs. Subsequent runs are scheduled automatically.
+**Results are saved automatically back into this repository** (not the Google Sheet):
 
-The ChatGPT Google Drive connection cannot authenticate an unattended GitHub runner; the separate service-account authorization is essential.
+- [discovered inventory URLs](results/discoveries.csv) — created on the first successful run
+- [full attempt log](results/audit.csv) — created on the first successful run
+- [readable progress report](results/PROGRESS.md) — created on the first successful run
+- [machine-readable progress](results/progress.json) — created on the first successful run
 
-## Limits and safeguards
+The original dealer snapshot is split into 20 files under [data/](data/), preserving the original Google Sheet row numbers for future synchronization. GitHub Actions commits the results using its built-in repository token. No user credentials are needed.
 
-- No paid scraping provider. GitHub Actions has free usage allowances, not unlimited resources. Check the GitHub billing page; set a $0 spending cap if available.
-- A populated URL means the landing page was reachable and classified when checked, **not** that its vehicle inventory is accurate or that it can be scraped.
-- The original directory is historical. Closed, renamed, merged, or redirected dealerships may remain unresolved. Do not treat guessed URL paths as verified.
-- Respect robots.txt and website rate limits. Do not bypass access controls or anti-bot systems.
-- Scheduled GitHub Actions runs can be delayed or disabled after inactivity. Watch the audit tab and run history.
-- This repository currently may be public; code contains **no credentials**. If you prefer privacy, change visibility in GitHub Settings → General → Danger Zone.
-- Do not modify production Auto Pilot code as part of this worker.
+## Start and check
 
-## Local tests
+Open [Actions → Auto Pilot inventory URL discovery](../../actions/workflows/discover.yml), click **Run workflow**, and choose batch size **5** for the initial test. After a successful run, the six-hour schedule proceeds automatically.
+
+If GitHub Actions reports a permissions error on the result commit, change **Settings → Actions → General → Workflow permissions** to **Read and write permissions** and rerun. GitHub account/repository policy can override workflow permissions.
+
+## Practical limitations
+
+- The directory is historical and contains closed/renamed dealers and stale website addresses; some records cannot be verified without external research.
+- Results are stored in GitHub. **Automatic Google Sheets syncing is not enabled**; adding that later requires Google authorization, or a separate periodic import.
+- GitHub Actions scheduling is best-effort and can be delayed or paused. GitHub-hosted runner usage is subject to GitHub's free allowances.
+- The current repository visibility is public; dealership names and public website URLs are publicly readable.
+- This crawler does not bypass anti-bot measures, logins, robots exclusions, or scrape vehicle listings.
+
+## Developer checks
 
 ```bash
 pip install -r requirements.txt
-PYTHONPATH=src python -m unittest discover -s tests -p "test_*.py" -v
+PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py' -v
+PYTHONPATH=src python src/repo_worker.py --batch-size 5
 ```
-
-To run locally, set `GOOGLE_SERVICE_ACCOUNT_JSON` and execute `python src/discover.py --batch-size 5 --workers 2`. Do not commit secrets.

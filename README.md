@@ -1,21 +1,21 @@
-# Auto Pilot — automated dealership inventory URL research
+# Auto Pilot — automated dealership inventory and lease-specials URL research
 
 **No Google Cloud setup. No API key. No paid scraping credits.**
 
-This repository is separate from the Auto Pilot production app. It contains a snapshot of all **19,169 dealerships** from the [Auto Pilot dealership Google Sheet](https://docs.google.com/spreadsheets/d/1tGBSFp-bxhW1_uocOU0uBinXtPos-TKPJLyNDmrNrX0/edit), including existing new and used inventory links.
+This repository is separate from the Auto Pilot production app. It contains a snapshot of all **19,169 dealerships** from the [Auto Pilot dealership Google Sheet](https://docs.google.com/spreadsheets/d/1tGBSFp-bxhW1_uocOU0uBinXtPos-TKPJLyNDmrNrX0/edit), including existing new and used inventory links. The worker also researches official lease-specials pages.
 
 ## Automatic operation
 
-The [GitHub Actions workflow](../../actions/workflows/discover.yml) is scheduled **every six hours**, checking up to **100 dealerships per run**. It visits dealer homepages, follows official inventory navigation and sitemaps, respects robots.txt, and only saves new/used category pages it can reach and classify. It does not scrape vehicle listings, invent URLs, or modify production Auto Pilot.
+The [GitHub Actions workflow](../../actions/workflows/discover.yml) is scheduled **every six hours**, checking up to **100 dealerships per run**. It visits dealer homepages, follows official inventory navigation and sitemaps, respects robots.txt, and only saves new/used category pages and dealership-hosted lease-specials pages it can reach and classify. Lease links must explicitly refer to leasing, not generic specials, and no offer prices or payment claims are extracted. It does not scrape vehicle listings, invent URLs, or modify production Auto Pilot.
 
 **Results are saved automatically back into this repository** (not the Google Sheet):
 
-- [discovered inventory URLs](results/discoveries.csv) — created on the first successful run
+- [discovered inventory and lease-specials URLs](results/discoveries.csv) — created on the first successful run
 - [full attempt log](results/audit.csv) — created on the first successful run
 - [readable progress report](results/PROGRESS.md) — created on the first successful run
 - [machine-readable progress](results/progress.json) — created on the first successful run
 
-The original dealer snapshot is split into 20 files under [data/](data/), preserving the original Google Sheet row numbers for future synchronization. GitHub Actions commits the results using its built-in repository token. No user credentials are needed.
+Previously checked dealerships are automatically revisited once for lease-specials research, even if their new and used inventory URLs were already found. Results include a `Lease Specials URL` column and the progress report counts lease links separately. The workflow does not claim that lease offers are current; Auto Pilot should display the dealership page and avoid asserting specific terms without fresh verification.\n\nThe original dealer snapshot is split into 20 files under [data/](data/), preserving the original Google Sheet row numbers for future synchronization. GitHub Actions commits the results using its built-in repository token. No user credentials are needed.
 
 ## Start and check
 

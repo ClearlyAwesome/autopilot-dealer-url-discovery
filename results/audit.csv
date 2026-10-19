@@ -99,3 +99,103 @@ Sheet Row,Source ID,Dealership,Website,Checked At UTC,Status,New Inventory URL,U
 109,405024,Volkswagen of Naples,http://www.vwofnaples.com,2026-10-19T05:48:23+00:00,homepage_blocked,,,,,,HTTP 403
 110,IL059,Darcy Hyundai,www.darcyhyundai.com,2026-10-19T05:48:23+00:00,robots_blocked,,,,,,robots disallow
 111,221106,Birdnow Chevrolet Cascade,http://www.birdnowchevycascade.com,2026-10-19T05:48:23+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.birdnowchevycascade.com', port=80): Max retries exceeded with url: /rob"
+112,13903,"Franklin Park Lincoln, Inc.",http://www.franklinparklincoln.com,2026-10-19T05:48:49+00:00,found_both,https://www.franklinparklincoln.com/inventory/new,https://www.franklinparklincoln.com/elite-used,homepage navigation; live category page,homepage navigation; live category page,https://www.franklinparklincoln.com/,
+113,3822,Boardwalk Nissan,http://www.boardwalknissan.com,2026-10-19T05:48:49+00:00,homepage_error,,,,,,HTTP 400
+114,8073,Sansone'S Route 1 Nissan,http://WWW.SANSONESNISSAN.COM,2026-10-19T05:48:49+00:00,found_both,https://www.sansonesnissan.com/searchnew.aspx,https://www.sansonesnissan.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.sansonesnissan.com/,
+115,1626,Arundel Ford,http://www.arundelfd.com,2026-10-19T05:48:49+00:00,robots_blocked,,,,,,robots disallow
+116,60503,Kuni Lexus of Greenwood Village,http://www.kunilexusofgreenwoodvillage.com,2026-10-19T05:48:49+00:00,robots_blocked,,,,,,robots disallow
+117,70545,Bert Ogden Infiniti,http://www.bertogdeninfiniti.com,2026-10-19T05:48:49+00:00,robots_blocked,,,,,,robots disallow
+118,6043,Westbrook Toyota,http://www.westbrooktoyota.com,2026-10-19T05:48:49+00:00,homepage_blocked,,,,,,HTTP 403
+119,424166,Molle Volkswagen,http://www.mollevwofkansascity.com,2026-10-19T05:48:49+00:00,found_both,https://www.mollevwofkansascity.com/searchnew.aspx,https://www.mollevwofkansascity.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.mollevwofkansascity.com/,
+120,117895,Tri-State Motors,http://www.tristateofcedarcity.com,2026-10-19T05:48:49+00:00,found_both,https://www.tristateofcedarcity.com/searchnew.aspx,https://www.tristateofcedarcity.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.tristateofcedarcity.com/,
+121,5805,Ford of West Memphis,http://www.westmemphisford.com,2026-10-19T05:48:49+00:00,found_both,https://www.fordofwestmemphis.com/searchnew.aspx,https://www.fordofwestmemphis.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.fordofwestmemphis.com/,
+122,111682,"Brost Chevrolet, Inc.",http://www.brostchevrolet.com,2026-10-19T05:48:50+00:00,robots_blocked,,,,,,robots disallow
+123,111703,Lake Motor Company,http://www.lakechevy.com,2026-10-19T05:48:50+00:00,found_both,https://www.lakechevy.com/searchnew.aspx,https://www.lakechevy.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.lakechevy.com/,
+124,228370,"Cadillac Of Mahwah, Llc",http://www.cadillacofmahwah.net,2026-10-19T05:48:50+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.cadillacofmahwah.net', port=80): Max retries exceeded with url: /robots"
+125,115174,"Burt Watson Chevrolet, Inc.",http://www.burtwatson.com,2026-10-19T05:48:50+00:00,robots_blocked,,,,,,robots disallow
+126,401136,Eastside Subaru,http://www.eastside.subaru.com,2026-10-19T05:48:51+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.eastside.subaru.com', port=80): Max retries exceeded with url: /robots."
+127,13058,Ed Martin Toyota,http://www.edmartin-toyota.com,2026-10-19T05:48:51+00:00,redirect_mismatch,,,,,https://www.edmartintoyota.com/,
+128,42219,Hoy-Fox Toyota,http://www.hoyfoxtoyota.com,2026-10-19T05:48:51+00:00,homepage_error,,,,,,HTTP 404
+129,44781,Danbury Chrysler Jeep Dodge Ram,http://www.danburydodge.net,2026-10-19T05:48:51+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPSConnectionPool(host='www.danburydodge.net', port=443): Max retries exceeded with url: /robots.t"
+130,3022,Lokey Nissan,http://www.lokeynissan.com,2026-10-19T05:48:51+00:00,robots_blocked,,,,,,robots disallow
+131,114413,"Hanigan Chevrolet, Inc.",http://www.haniganchevrolet.com,2026-10-19T05:48:51+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.haniganchevrolet.com', port=80): Max retries exceeded with url: /robots"
+132,42689,Stokes Chrysler Company,http://www.stokeschrysler.com,2026-10-19T05:48:51+00:00,robots_blocked,,,,,,robots disallow
+133,MI014,Thelen Kia,http://www.thelenkia.com,2026-10-19T05:48:51+00:00,homepage_blocked,,,,,,HTTP 403
+134,160034,"Andy Mohr Buick-Pontiac-Gmc,Inc.",http://www.andymohrgmcbuick.com,2026-10-19T05:48:51+00:00,found_both,https://www.andymohrgmcbuick.com/searchnew.aspx,https://www.andymohrgmcbuick.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.andymohrgmcbuick.com/,
+135,60460,Herpolsheimer's,http://www.herpolsheimers.net,2026-10-19T05:48:51+00:00,robots_blocked,,,,,,robots disallow
+136,112619,"Terry Thompson Chevrolet, Inc.",http://www.terrythompsonchevrolet.com,2026-10-19T05:48:51+00:00,robots_blocked,,,,,,robots disallow
+137,5391,Victorville Mitsubishi,www.victorvillemitsubishi.com,2026-10-19T05:48:52+00:00,found_both,https://www.victorvillemitsubishi.com/cars/new/,https://www.victorvillemitsubishi.com/used-car-dealer-near-victorville-ca/,homepage navigation; live category page,homepage navigation; live category page,https://www.victorvillemitsubishi.com/,
+138,263368,"Motor Inn Of Knoxville, Llc",http://www.motorinnknoxville.com,2026-10-19T05:48:52+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.motorinnknoxville.com', port=80): Max retries exceeded with url: /robot"
+139,423063,Armstrong Volkswagen,http://www.armstrongvw.com,2026-10-19T05:48:52+00:00,found_both,https://www.armstrongvw.com/searchnew.aspx,https://www.armstrongvw.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.armstrongvw.com/,
+140,24053,Seeger Toyota of St. Robert,http://www.seegertoyota.net,2026-10-19T05:48:52+00:00,found_both,https://www.seegertoyota.net/searchnew.aspx,https://www.seegertoyota.net/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.seegertoyota.net/,
+141,8128,"Baldwin Ford-Lincoln, Inc.",http://www.baldwinlincolnofpoplarbluff.com,2026-10-19T05:48:52+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.baldwinlincolnofpoplarbluff.com', port=80): Max retries exceeded with u"
+142,4910,AutoNation Ford Panama City,http://www.autonationford-panamacity.com,2026-10-19T05:48:52+00:00,robots_blocked,,,,,,robots disallow
+143,2198,Ray Brandt Nissan,http://www.raybrandtnissan.com/,2026-10-19T05:48:53+00:00,robots_blocked,,,,,,robots disallow
+144,112884,"Daniel Chevrolet-Buick, Inc.",http://www.danielchevroletbuick.com,2026-10-19T05:48:53+00:00,redirect_mismatch,,,,,https://www.danielchevrolet.com/,
+145,12143,O'Brien Toyota of Urbana,http://www.obrientoyotaurbana.com,2026-10-19T05:48:53+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.obrientoyotaurbana.com', port=80): Max retries exceeded with url: /robo"
+146,30169,Glanzmann Subaru,http://www.glanzmann.subaru.com,2026-10-19T05:48:53+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.glanzmann.subaru.com', port=80): Max retries exceeded with url: /robots"
+147,4220,"Fox Charlevoix Ford, LLC",http://www.foxcharlevoixford.net,2026-10-19T05:48:53+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.foxcharlevoixford.net', port=80): Max retries exceeded with url: /robot"
+148,408092,Mitchell Volkswagen,http://www.mitchellvw.com,2026-10-19T05:48:53+00:00,robots_blocked,,,,,,robots disallow
+149,189449,"Moore Chevrolet, Buick, Gmc",http://www.mooregm.com,2026-10-19T05:48:53+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.mooregm.com', port=80): Max retries exceeded with url: /robots.txt (Cau"
+150,10021,Central Florida Lincoln,http://www.centralfloridalincoln.net,2026-10-19T05:48:53+00:00,robots_blocked,,,,,,robots disallow
+151,NC063,Hendrick Kia Of Concord,http://www.hendrickkiaofconcord.com,2026-10-19T05:48:53+00:00,robots_blocked,,,,,,robots disallow
+152,62100,"Kempthorn Motors, Inc.",www.kempthorn.mercedesdealer.com,2026-10-19T05:48:53+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPSConnectionPool(host='www.kempthorn.mercedesdealer.com', port=443): Max retries exceeded with ur"
+153,53781,Isringhausen Imports,http://www.isringhausenbmw.com,2026-10-19T05:48:53+00:00,robots_blocked,,,,,,robots disallow
+154,IL073,Mcgrath City Hyundai,www.mcgrathhyundai.com,2026-10-19T05:48:53+00:00,homepage_blocked,,,,,,HTTP 403
+155,70403,Austin Infiniti,http://www.austininfiniti.com/,2026-10-19T05:48:53+00:00,robots_blocked,,,,,,robots disallow
+156,5868,"Sullivan Ford Lincoln, Inc.",http://www.sullivanlincoln.net,2026-10-19T05:48:53+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.sullivanlincoln.net', port=80): Max retries exceeded with url: /robots."
+157,42259,Loving Toyota,http://www.lovingtoyota.com,2026-10-19T05:48:54+00:00,robots_blocked,,,,,,robots disallow
+158,TX130,Central Kia Of Irving,http://www.centralkia-irving.com/index.htm,2026-10-19T05:48:54+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.centralkia-irving.com', port=80): Max retries exceeded with url: /robot"
+159,2683,Hubler Nissan,http://www.hublernissan.com/,2026-10-19T05:48:54+00:00,found_both,https://www.hublernissan.com/searchnew.aspx,https://www.hublernissan.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.hublernissan.com/,
+160,15047,Hendrick Scion Merriam,http://www.hendrickscionmerriam.com,2026-10-19T05:48:54+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPSConnectionPool(host='www.hendrickscionmerriam.com', port=443): Max retries exceeded with url: /"
+161,116729,Ruddell Auto Mall,http://www.ruddellauto.net,2026-10-19T05:48:54+00:00,redirect_mismatch,,,,,https://www.ruddellauto.com/,
+162,115813,Lee Buick Gmc Truck,http://www.leepbg.com,2026-10-19T05:48:54+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.leepbg.com', port=80): Max retries exceeded with url: /robots.txt (Caus"
+163,118550,K. C. Summers Buick Gmc,http://www.kcsummersbuickgmc.com,2026-10-19T05:48:54+00:00,found_both,https://www.kcsummersbuickgmc.com/searchnew.aspx,https://www.kcsummersbuickgmc.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.kcsummersbuickgmc.com/,
+164,2393,Kowalski Ford,http://www.kowalskiford.net,2026-10-19T05:48:54+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.kowalskiford.net', port=80): Max retries exceeded with url: /robots.txt"
+165,68669,Towne Chrysler Jeep Dodge,http://www.townechryslerdodgejeep.com,2026-10-19T05:48:54+00:00,robots_blocked,,,,,,robots disallow
+166,10035,North Georgia Toyota,http://www.northgeorgiatoyota.com,2026-10-19T05:48:55+00:00,found_both,https://www.northgeorgiatoyota.com/new-vehicles/,https://www.northgeorgiatoyota.com/used-vehicles/?flags.type=Special,homepage navigation; live category page,homepage navigation; live category page,https://www.northgeorgiatoyota.com/,
+167,42322,Scion of Pharr,http://www.toyotaofpharr.com,2026-10-19T05:48:55+00:00,robots_blocked,,,,,,robots disallow
+168,3341,Raceway Ford of Hartsville,http://www.racewayautoofhartsville.com,2026-10-19T05:48:55+00:00,found_both,https://www.racewayfordhartsville.com/searchnew.aspx,https://www.racewayfordhartsville.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.racewayfordhartsville.com/,
+169,118262,"Wyatt Johnson Automotive Group, Inc.",http://www.tennesseebuickgmc.com,2026-10-19T05:48:56+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.tennesseebuickgmc.com', port=80): Max retries exceeded with url: /robot"
+170,60434,Desert Lexus,http://www.desertlexus.com,2026-10-19T05:48:56+00:00,robots_blocked,,,,,,robots disallow
+171,288908,Terry Reid Buick Gmc,http://www.terryreidbuickgmc.com,2026-10-19T05:48:56+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.terryreidbuickgmc.com', port=80): Max retries exceeded with url: /robot"
+172,5190,Tates Nissan Buick Gmc,http://www.tatesnissan.com,2026-10-19T05:48:56+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.tatesnissan.com', port=80): Max retries exceeded with url: /robots.txt "
+173,6358,"Scaffidi Motors, Inc.",http://www.scaffidilincoln.com,2026-10-19T05:48:56+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.scaffidilincoln.com', port=80): Max retries exceeded with url: /robots."
+174,45087,Nelson Toyota,http://www.nelsontoyotava.com,2026-10-19T05:48:56+00:00,robots_blocked,,,,,,robots disallow
+175,117540,"Howard Bentley Buick Gmc, Inc.",http://www.howardbentleyauto.com,2026-10-19T05:48:56+00:00,found_both,https://www.howardbentleyauto.com/new-inventory/index.htm?normalBodyStyle=SUV,https://www.howardbentleyauto.com/used-cars/albertville-alabama.htm?internetPrice=10000-30000,homepage navigation; live category page,homepage navigation; live category page,https://www.howardbentleyauto.com/,
+176,113436,Troy-Alan Chevrolet Buick Gmc,http://www.troyalanchevrolet.net,2026-10-19T05:48:56+00:00,robots_blocked,,,,,,robots disallow
+177,VT001,Burlington Hyundai,,2026-10-19T05:48:56+00:00,missing_website,,,,,,
+178,111289,"Fairground Auto Plaza, Inc.",http://www.fairchev.com,2026-10-19T05:48:56+00:00,redirect_mismatch,,,,,https://www.edmorsechevroletbuickgmcrolla.com/,
+179,422A72,Hoehn Audi,www.hoehnaudi.com,2026-10-19T05:48:57+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPSConnectionPool(host='www.hoehnaudi.com', port=443): Max retries exceeded with url: /robots.txt "
+180,NE005,H & H Kia,http://www.hhkia.com,2026-10-19T05:48:57+00:00,homepage_blocked,,,,,,HTTP 403
+181,68377,Vero Beach Chrysler Jeep Dodge Ram,http://www.verobeachchrysler.net,2026-10-19T05:48:57+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPSConnectionPool(host='www.verobeachchrysler.net', port=443): Max retries exceeded with url: /rob"
+182,251565,Vern Eide Acura,http://verneideacura.com/,2026-10-19T05:48:57+00:00,robots_blocked,,,,,,robots disallow
+183,26879,Lake Woods Chrysler Dodge Jeep Ram,http://www.lakewoodschrysler.com,2026-10-19T05:48:57+00:00,robots_blocked,,,,,,robots disallow
+184,6452,Sakelaris Ford of California,http://www.sakelarisfordofcalifornia.com,2026-10-19T05:48:57+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.sakelarisfordofcalifornia.com', port=80): Max retries exceeded with url"
+185,7298,Pacifico Marple Ford Lincoln,http://www.pacificomarple.com,2026-10-19T05:48:57+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPSConnectionPool(host='www.pacificomarple.com', port=443): Max retries exceeded with url: /robots"
+186,113926,Blaise Alexander Chevrolet Buick,http://www.blaisealexanderautogroup.com,2026-10-19T05:48:57+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.blaisealexanderautogroup.com', port=80): Max retries exceeded with url:"
+187,113106,Hansen Motor Company,http://www.hansenmotors.com,2026-10-19T05:48:57+00:00,found_both,https://www.hansenmotors.com/searchnew.aspx,https://www.hansenmotors.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.hansenmotors.com/,
+188,113261,"Sullivan-Parkhill Automotive, Inc.",http://www.sullivanparkhillil.com,2026-10-19T05:48:57+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.sullivanparkhillil.com', port=80): Max retries exceeded with url: /robo"
+189,4501555,Flemington Porsche,http://flemington.porschedealer.com,2026-10-19T05:48:57+00:00,homepage_error,,,,,,HTTP 404
+190,2477,Montrose Nissan,http://montrosenissan.com/,2026-10-19T05:48:58+00:00,robots_blocked,,,,,,robots disallow
+191,4677,"Yoder Ford, Inc.",http://www.billyoderford.com,2026-10-19T05:48:58+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.billyoderford.com', port=80): Max retries exceeded with url: /robots.tx"
+192,269155,Ed Shults Of Westfield,http://www.shultsofwestfield.com,2026-10-19T05:48:58+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPSConnectionPool(host='www.shultsofwestfield.com', port=443): Max retries exceeded with url: /rob"
+193,43931,Chapman's Las Vegas Dodge Chrysler Jeep,http://www.chapmanslasvegasdodge.com,2026-10-19T05:48:58+00:00,found_both,https://www.lasvegasdodge.com/search/new,https://www.lasvegasdodge.com/search/used,homepage navigation; live category page,homepage navigation; live category page,https://www.lasvegasdodge.com/,
+194,119584,Lou Fusz Chevrolet,http://www.loufuszchevrolet.com,2026-10-19T05:48:58+00:00,robots_blocked,,,,,,robots disallow
+195,425173,Patterson Volkswagen of Tyler,http://www.pattersontylervw.com,2026-10-19T05:48:58+00:00,robots_unavailable,,,,,,robots HTTP 500
+196,3743,Coastal Nissan,http://www.coastalnissan.com/,2026-10-19T05:48:58+00:00,found_both,https://www.coastalnissan.com/searchnew.aspx,https://www.coastalnissan.com/searchused.aspx,homepage navigation; live category page,homepage navigation; live category page,https://www.coastalnissan.com/,
+197,13053,Fort Wayne Scion,http://www.fortwaynescion.com,2026-10-19T05:48:58+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.fortwaynescion.com', port=80): Max retries exceeded with url: /robots.t"
+198,44629,Swift Chrysler Jeep Dodge,http://www.swiftchryslerjeepdodge.com,2026-10-19T05:48:58+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.swiftchryslerjeepdodge.com', port=80): Max retries exceeded with url: /"
+199,12138,St. Charles Toyota,http://www.stcharlestoyota.net,2026-10-19T05:48:58+00:00,robots_blocked,,,,,,robots disallow
+200,AA7QS,Connecticuts Own Volvo,http://www.ctsownvolvo.com,2026-10-19T05:48:59+00:00,robots_blocked,,,,,,robots disallow
+201,5411,Newton Nissan South,http://www.NewtonNissanSouth.com,2026-10-19T05:48:59+00:00,robots_blocked,,,,,,robots disallow
+202,422533,Volkswagen of Orange,http://www.anaheim-vw.com,2026-10-19T05:48:59+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.anaheim-vw.com', port=80): Max retries exceeded with url: /robots.txt ("
+203,3728,Antelope Valley Nissan,http://www.avnissan.com/,2026-10-19T05:48:59+00:00,robots_unavailable,,,,,,robots unavailable: Exceeded 30 redirects.
+204,178518,"Town & Country Salida, Inc.",http://www.salidachevy.com,2026-10-19T05:48:59+00:00,robots_blocked,,,,,,robots disallow
+205,20146,Dennison Ford Inc,http://www.dennisonford.net,2026-10-19T05:48:59+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.dennisonford.net', port=80): Max retries exceeded with url: /robots.txt"
+206,112861,"Don Hall Chevrolet-Buick-Gmc-Cadillac, Inc..",http://www.donhallgmsupercenter.com,2026-10-19T05:48:59+00:00,redirect_mismatch,,,,,https://www.markportergm.com/,
+207,119662,Courtesy Buick Gmc,http://www.lafayettecourtesy.com,2026-10-19T05:49:00+00:00,found_both,https://www.lafayettecourtesy.com/searchnew.aspx,https://www.lafayettecourtesy.com/used-car-faqs.html,homepage navigation; live category page,homepage navigation; live category page,https://www.lafayettecourtesy.com/,
+208,113643,Hertrich Chevrolet,http://www.hertrichchevroletdenton.com,2026-10-19T05:49:00+00:00,robots_blocked,,,,,,robots disallow
+209,90777,Rancho Grande Subaru,http://www.ranchogrande-ca.subaru.com,2026-10-19T05:49:00+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.ranchogrande-ca.subaru.com', port=80): Max retries exceeded with url: /"
+210,24052,Straatmann Toyota,http://www.straatmanntoyota.com,2026-10-19T05:49:00+00:00,homepage_blocked,,,,,,HTTP 403
+211,6060,"Sakelaris Ford Lincoln of Rolla, Inc.",http://www.sakelarislincolnofrolla.com,2026-10-19T05:49:00+00:00,robots_unavailable,,,,,,"robots unavailable: HTTPConnectionPool(host='www.sakelarislincolnofrolla.com', port=80): Max retries exceeded with url: "

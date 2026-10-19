@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.log
+.env
+run-report.json
+service-account-key.json
+*service-account*.json

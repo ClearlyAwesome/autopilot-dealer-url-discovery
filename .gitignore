@@ -5,3 +5,7 @@ __pycache__/
 run-report.json
 service-account-key.json
 *service-account*.json
+
+# Contact research contains staff emails; keep locally, never in public Git history
+local_contact_research*.csv
+local_contact_audit*.csv

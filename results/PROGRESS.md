@@ -1,17 +1,17 @@
 # Auto Pilot inventory URL discovery
 
-Last run (UTC): **2026-11-09T22:30:30+00:00**
+Last run (UTC): **2026-11-10T07:29:47+00:00**
 
 - Dealerships in directory: **19,169**
-- Dealerships with both URLs: **634**
-- New inventory URLs: **670**
-- Used inventory URLs: **663**
-- Lease specials URLs: **182**
+- Dealerships with both URLs: **641**
+- New inventory URLs: **678**
+- Used inventory URLs: **670**
+- Lease specials URLs: **184**
 - Dealerships checked this run: **100**
-- Total checks logged: **7,600**
-- New links found this run: **0**
-- Used links found this run: **0**
-- Lease specials links found this run: **0**
+- Total checks logged: **7,700**
+- New links found this run: **8**
+- Used links found this run: **7**
+- Lease specials links found this run: **2**
 
 Results: [discovered URLs](discoveries.csv) · [audit](audit.csv)
 

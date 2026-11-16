@@ -39,7 +39,7 @@ def write_csv(path, headers, rows):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--batch-size", type=int, default=100)
-    p.add_argument("--workers", type=int, default=6)
+    p.add_argument("--workers", type=int, default=10)
     args = p.parse_args()
     sources = sorted(glob.glob("data/dealers-*.csv"))
     if not sources:
@@ -80,8 +80,8 @@ def main():
     now = now_utc()
     todo = [(number, row) for number, row in rows
             if eligible(number, row, history, now, lease_checked=number in lease_checked)]
-    # Revisit previously researched dealerships first, then continue the nationwide directory.
-    todo.sort(key=lambda item: (item[0] not in history, item[0]))
+    # Prioritize first-time coverage before retries.
+    todo.sort(key=lambda item: (item[0] in history, item[0]))
     selected = todo[:min(250, max(1, args.batch_size))]
     checked = []
     with ThreadPoolExecutor(max_workers=min(10, max(1, args.workers))) as pool:
@@ -90,6 +90,23 @@ def main():
             result = future.result()
             checked.append(result)
             print(f"Row {result.number}: {result.status}", flush=True)
+    contact_fields = ["Sheet Row", "Source ID", "Dealership", "Website", "Email", "Role", "Email Source URL", "Email Evidence", "Contact Form URL", "Checked At UTC", "Verification"]
+    contacts = {int(x["Sheet Row"]): x for x in read_csv("results/contacts.csv") if x.get("Sheet Row", "").isdigit()}
+    for result in checked:
+        if result.contact_email or result.contact_form:
+            old = contacts.get(result.number, {})
+            contacts[result.number] = {
+                "Sheet Row": str(result.number), "Source ID": result.row.get("Source ID", ""),
+                "Dealership": result.row.get("Dealership", ""), "Website": result.row.get("Website", ""),
+                "Email": result.contact_email or old.get("Email", ""),
+                "Role": result.contact_role or old.get("Role", ""),
+                "Email Source URL": result.contact_source or old.get("Email Source URL", ""),
+                "Email Evidence": "public website; mailbox not verified" if result.contact_email else old.get("Email Evidence", ""),
+                "Contact Form URL": result.contact_form or old.get("Contact Form URL", ""),
+                "Checked At UTC": result.checked,
+                "Verification": "published_only_not_deliverability_verified" if result.contact_email else "form_url_only"
+            }
+    write_csv("results/contacts.csv", contact_fields, sorted(contacts.values(), key=lambda x: int(x["Sheet Row"])))
     count_new = count_used = count_lease = 0
     for result in checked:
         number = result.number
@@ -142,6 +159,9 @@ def main():
         "used_urls_total": used_count,
         "lease_urls_total": lease_count,
         "dealerships_with_both_urls": both_count,
+        "contact_emails_total": sum(bool(x.get("Email")) for x in contacts.values()),
+        "contact_forms_total": sum(bool(x.get("Contact Form URL")) for x in contacts.values()),
+        "contact_emails_found_this_run": sum(bool(x.contact_email) for x in checked),
         "remaining_to_research": len(todo) - len(selected),
         "status_counts": dict(Counter(r.status for r in checked)),
         "note": "URLs collected in GitHub results/discoveries.csv; Google Sheet not automatically synced."
@@ -161,7 +181,7 @@ def main():
         f"- New links found this run: **{count_new}**\n"
         f"- Used links found this run: **{count_used}**\n"
         f"- Lease specials links found this run: **{count_lease}**\n\n"
-        "Results: [discovered URLs](discoveries.csv) · [audit](audit.csv)\n\n"
+        "Results: [discovered URLs](discoveries.csv) · [public contacts](contacts.csv) · [audit](audit.csv)\n\n"
         "Results are stored in GitHub. Google Sheets synchronization is not enabled.\n",
         encoding="utf-8"
     )

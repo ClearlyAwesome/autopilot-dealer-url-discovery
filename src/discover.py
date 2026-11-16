@@ -242,12 +242,50 @@ class Result:
     lease_evidence: str = ""
     final_home: str = ""
     notes: str = ""
+    contact_email: str = ""
+    contact_source: str = ""
+    contact_role: str = ""
+    contact_form: str = ""
 
     def audit(self):
         return [str(self.number), self.row.get("Source ID", ""), self.row.get("Dealership", ""),
                 self.row.get("Website", ""), self.checked, self.status, self.new, self.used,
                 self.new_evidence, self.used_evidence, self.final_home, self.notes,
                 self.lease, self.lease_evidence, self.checked]
+
+
+EMAIL_RE = re.compile(r"(?<![\\w.+-])[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}(?![\\w.-])", re.I)
+CONTACT_RE = re.compile(r"contact|staff|team|internet.sales|sales.department", re.I)
+BAD_EMAIL = re.compile(r"(?:example\\.|test\\.|wix\\.|sentry\\.|cloudflare\\.|wordpress\\.|noreply|no-reply|privacy|support@|webmaster@|png|jpg|jpeg|svg)", re.I)
+
+def public_contacts(html, base):
+    soup = BeautifulSoup(html[:350000], "html.parser")
+    candidates = []
+    for a in soup.select("a[href]"):
+        href = a.get("href", "")
+        if href.lower().startswith("mailto:"):
+            email = urllib.parse.unquote(href[7:].split("?")[0]).strip()
+            candidates.append((email, "mailto link"))
+    for email in EMAIL_RE.findall(soup.get_text(" ", strip=True)):
+        candidates.append((email, "visible page text"))
+    emails = []
+    for email, evidence in candidates:
+        email = email.strip(".,;:<>[]()").lower()
+        if not EMAIL_RE.fullmatch(email) or BAD_EMAIL.search(email):
+            continue
+        if email not in [x[0] for x in emails]:
+            emails.append((email, evidence))
+    emails.sort(key=lambda x: (not bool(re.search(r"sales|internet|bdc|leads|manager", x[0], re.I)), x[0]))
+    pages = []
+    for a in soup.select("a[href]"):
+        href = a.get("href", "")
+        label = a.get_text(" ", strip=True)
+        url = url_clean(urllib.parse.urljoin(base, href))
+        if url and same_site(base, url) and CONTACT_RE.search(label + " " + urllib.parse.urlsplit(url).path):
+            if url != base and url not in pages:
+                pages.append(url)
+    form = next((url for url in pages if "contact" in url.lower()), "")
+    return emails, form, pages[:3]
 
 
 def inspect(number, row):
@@ -262,6 +300,21 @@ def inspect(number, row):
         if not same_site(home, actual) and not identity_ok(row, html):
             out.status = "redirect_mismatch"
             return out
+        emails, out.contact_form, contact_pages = public_contacts(html, actual)
+        if not emails and contact_pages:
+            try:
+                contact_html, contact_final = fetch(contact_pages[0])
+                if same_site(actual, contact_final):
+                    emails, nested_form, _ = public_contacts(contact_html, contact_final)
+                    out.contact_form = out.contact_form or nested_form or contact_final
+                    if emails:
+                        out.contact_source = contact_final
+            except FetchError:
+                pass
+        if emails:
+            out.contact_email = emails[0][0]
+            out.contact_role = "sales_candidate" if re.search(r"sales|internet|bdc|leads|manager", out.contact_email, re.I) else "general"
+            out.contact_source = out.contact_source or actual
         found = links(html, actual)
         if any(not row.get(column) and not any(score(u, label, kind) for u, label, _ in found)
                for column, kind in (("New Inventory URL", "new"), ("Used Inventory URL", "used"),

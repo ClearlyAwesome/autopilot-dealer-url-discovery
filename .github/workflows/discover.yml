@@ -2,13 +2,13 @@ name: Auto Pilot inventory URL discovery
 
 on:
   schedule:
-    - cron: '23 */6 * * *'
+    - cron: '23 */2 * * *'
   workflow_dispatch:
     inputs:
       batch_size:
         description: 'Dealerships to inspect this run (1-250)'
         required: false
-        default: '100'
+        default: '250'
 
 permissions:
   contents: write
@@ -20,7 +20,7 @@ concurrency:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,9 +36,9 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/src
       - name: Research dealership URLs
-        run: python src/repo_worker.py --batch-size "$BATCH_SIZE" --workers 6
+        run: python src/repo_worker.py --batch-size "$BATCH_SIZE" --workers 10
         env:
-          BATCH_SIZE: ${{ github.event.inputs.batch_size || '100' }}
+          BATCH_SIZE: ${{ github.event.inputs.batch_size || '250' }}
       - name: Save research results to GitHub
         run: |
           git config user.name 'github-actions[bot]'

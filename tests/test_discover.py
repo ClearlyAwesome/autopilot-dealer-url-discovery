@@ -1,6 +1,6 @@
 import datetime as dt
 import unittest
-from discover import url_clean, same_site, score, links, eligible, page_ok
+from discover import url_clean, same_site, score, links, eligible, page_ok, public_contacts, retry_delay
 
 class TestDiscovery(unittest.TestCase):
     def test_url_safety(self):
@@ -37,6 +37,26 @@ class TestDiscovery(unittest.TestCase):
         row = {"New Inventory URL": "new", "Used Inventory URL": "used", "Lease Specials URL": ""}
         self.assertTrue(eligible(2, row, {2: [("2026-10-18T00:00:00+00:00", "found_both")]}, now, lease_checked=False))
         self.assertFalse(eligible(2, row, {2: [("2026-10-18T00:00:00+00:00", "found_both")]}, now, lease_checked=True))
+
+    def test_public_contacts(self):
+        html = '<a href="mailto:sales@dealer.com">Sales</a><a href="/contact-us/">Contact Us</a>'
+        emails, form, pages = public_contacts(html, "https://dealer.com/")
+        self.assertEqual(emails[0][0], "sales@dealer.com")
+        self.assertEqual(form, "https://dealer.com/contact-us/")
+        self.assertTrue(pages)
+
+    def test_retry_after(self):
+        class Response:
+            headers = {"Retry-After": "3"}
+        self.assertEqual(retry_delay(Response(), 0), 3.0)
+
+    def test_access_denied_cooldown(self):
+        now = dt.datetime(2026, 11, 18, tzinfo=dt.timezone.utc)
+        row = {"New Inventory URL": "", "Used Inventory URL": "", "Lease Specials URL": ""}
+        recent = {2: [("2026-11-15T00:00:00+00:00", "homepage_blocked")]}
+        self.assertFalse(eligible(2, row, recent, now, lease_checked=True))
+        old = {2: [("2026-11-01T00:00:00+00:00", "homepage_blocked")]}
+        self.assertTrue(eligible(2, row, old, now, lease_checked=True))
 
     def test_links(self):
         html = '<a href="/new-vehicles/">New Inventory</a><a href="/used-vehicles/">Used Inventory</a><a href="https://other.com/used-vehicles/">Used</a>'

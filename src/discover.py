@@ -3,6 +3,8 @@
 import argparse
 import concurrent.futures
 import datetime as dt
+import email.utils
+import random
 import ipaddress
 import json
 import os
@@ -32,10 +34,59 @@ LEASE = re.compile(r"(?:lease[-_/]?(?:specials?|offers?|deals?|incentives?)|(?:s
 LEASE_LABEL = re.compile(r"\b(?:lease (?:specials?|offers?|deals?|incentives?)|(?:specials?|offers?|deals?|incentives?) (?:on )?leases?|current lease (?:offers?|deals?)|leasing (?:specials?|offers?|deals?))\b", re.I)
 LEASE_BAD = re.compile(r"(?:service|parts|maintenance|coupon|privacy|/vdp/|/vin/|/vehicle-details/|finance[-_/]?application|credit[-_/]?application)", re.I)
 EXCLUDE = re.compile(r"(?:specials|offers|incentives|service|parts|appointment|finance|lease|privacy|coupon|rebate|trade[-_]?in|certified[-_]?only|/vdp/|/vin/|/vehicle-details/)", re.I)
-RETRYABLE = {"homepage_error", "robots_unavailable", "fetch_error", "homepage_blocked"}
+RETRYABLE = {"homepage_error", "robots_unavailable", "robots_rate_limited", "homepage_rate_limited", "fetch_error", "homepage_blocked"}
 ROBOTS = {}
 LOCK = threading.Lock()
 LOCAL = threading.local()
+DOMAIN_LOCKS = {}
+DOMAIN_LAST = {}
+DOMAIN_MIN_INTERVAL = 0.7
+
+
+def domain_pause(url):
+    """Space requests to each hostname, even across worker threads."""
+    key = host(url)
+    with LOCK:
+        gate = DOMAIN_LOCKS.setdefault(key, threading.Lock())
+    with gate:
+        wait = DOMAIN_MIN_INTERVAL - (time.monotonic() - DOMAIN_LAST.get(key, 0))
+        if wait > 0:
+            time.sleep(wait)
+        DOMAIN_LAST[key] = time.monotonic()
+
+
+def retry_delay(response, attempt):
+    header = response.headers.get("Retry-After", "").strip()
+    if header:
+        try:
+            return min(12.0, max(0.0, float(header)))
+        except ValueError:
+            try:
+                target = email.utils.parsedate_to_datetime(header)
+                return min(12.0, max(0.0, (target - now_utc()).total_seconds()))
+            except (TypeError, ValueError, OverflowError):
+                pass
+    return min(8.0, 1.5 * (2 ** attempt) + random.uniform(0, 0.4))
+
+
+def get_with_backoff(url, **kwargs):
+    """Retry transient HTTP failures only; do not retry explicit access denials."""
+    for attempt in range(3):
+        domain_pause(url)
+        try:
+            response = session().get(url, **kwargs)
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            if attempt == 2:
+                raise
+            time.sleep(min(8.0, 1.5 * (2 ** attempt)))
+            continue
+        if response.status_code in (429, 500, 502, 503, 504) and attempt < 2:
+            delay = retry_delay(response, attempt)
+            response.close()
+            time.sleep(delay)
+            continue
+        return response
+    raise FetchError("retries exhausted")
 
 
 def now_utc():
@@ -100,13 +151,13 @@ def robots_allowed(url):
         cached = ROBOTS.get(root)
     if cached is None:
         try:
-            r = session().get(root + "/robots.txt", timeout=(4, 6))
+            r = get_with_backoff(root + "/robots.txt", timeout=(4, 6))
             if r.status_code in (401, 403):
                 cached = False
             elif r.status_code in (404, 410):
                 cached = True
             elif r.status_code == 429 or r.status_code >= 500:
-                raise FetchError("robots HTTP " + str(r.status_code))
+                raise FetchError("robots_http_" + str(r.status_code))
             elif r.ok:
                 parser = urllib.robotparser.RobotFileParser()
                 parser.parse(r.text[:200000].splitlines())
@@ -114,7 +165,7 @@ def robots_allowed(url):
             else:
                 cached = True
         except requests.RequestException as exc:
-            raise FetchError("robots unavailable: " + str(exc)[:100]) from exc
+            raise FetchError("robots_unavailable: " + str(exc)[:100]) from exc
         with LOCK:
             ROBOTS[root] = cached
     return cached if isinstance(cached, bool) else cached.can_fetch(UA, url)
@@ -129,13 +180,17 @@ def fetch(url, max_bytes=1200000):
         if not robots_allowed(url):
             raise RobotsBlocked("robots disallow")
         try:
-            with session().get(url, timeout=(4, 9), stream=True, allow_redirects=False) as r:
+            with get_with_backoff(url, timeout=(4, 9), stream=True, allow_redirects=False) as r:
                 if r.status_code in (301, 302, 303, 307, 308):
                     target = url_clean(urllib.parse.urljoin(url, r.headers.get("Location", "")))
                     if not target:
                         raise FetchError("invalid redirect")
                     url = target
                     continue
+                if r.status_code == 429:
+                    raise FetchError("rate_limited_http_429")
+                if r.status_code in (401, 403):
+                    raise FetchError("homepage_access_denied_http_" + str(r.status_code))
                 if r.status_code >= 400:
                     raise FetchError("HTTP " + str(r.status_code))
                 typ = r.headers.get("Content-Type", "").lower()
@@ -356,7 +411,11 @@ def inspect(number, row):
         out.status, out.notes = "robots_blocked", str(exc)
     except FetchError as exc:
         msg = str(exc)
-        out.status = "robots_unavailable" if "robots" in msg else "homepage_blocked" if re.search(r"HTTP (401|403|429)", msg) else "homepage_error"
+        out.status = ("robots_rate_limited" if "robots_http_429" in msg else
+                      "robots_unavailable" if "robots" in msg else
+                      "homepage_rate_limited" if "rate_limited_http_429" in msg else
+                      "homepage_blocked" if "homepage_access_denied" in msg else
+                      "homepage_error")
         out.notes = msg[:180]
     except Exception as exc:
         out.status, out.notes = "fetch_error", (type(exc).__name__ + ": " + str(exc))[:180]
@@ -399,14 +458,12 @@ class Sheets:
 
 def eligible(number, row, history, now, lease_checked=False):
     # Backfill previously researched dealers after lease support is introduced.
-    if not row.get("Lease Specials URL") and not lease_checked:
-        return True
     if row.get("New Inventory URL") and row.get("Used Inventory URL"):
         return False
     past = history.get(number, [])
     if not past:
         return True
-    if len(past) >= 3:
+    if len(past) >= 4:
         return False
     stamp, status = past[-1]
     try:
@@ -414,7 +471,9 @@ def eligible(number, row, history, now, lease_checked=False):
     except (ValueError, TypeError):
         hours = 10000
     if status in RETRYABLE:
-        return hours >= 48
+        # Longer cooldown for access denials; avoid hammering restricted websites.
+        cooldown = 168 if status == "homepage_blocked" else 72 if "rate_limited" in status else 48
+        return hours >= cooldown and len(past) < 4
     if status in ("found_new_only", "found_used_only"):
         return hours >= 168 and len(past) < 2
     if status == "no_matching_links":

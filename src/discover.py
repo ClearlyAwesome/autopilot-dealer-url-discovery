@@ -457,7 +457,9 @@ class Sheets:
 
 
 def eligible(number, row, history, now, lease_checked=False):
-    # Backfill previously researched dealers after lease support is introduced.
+    # One-time lease backfill, then normal retry limits.
+    if not row.get("Lease Specials URL") and not lease_checked:
+        return True
     if row.get("New Inventory URL") and row.get("Used Inventory URL"):
         return False
     past = history.get(number, [])

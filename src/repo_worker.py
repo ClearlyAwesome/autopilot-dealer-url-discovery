@@ -80,7 +80,7 @@ def main():
     now = now_utc()
     todo = [(number, row) for number, row in rows
             if eligible(number, row, history, now, lease_checked=number in lease_checked)]
-    # Prioritize first-time coverage before retries.
+    # Prioritize first-time coverage before retries; never waste the primary queue on repeat failures.
     todo.sort(key=lambda item: (item[0] in history, item[0]))
     selected = todo[:min(250, max(1, args.batch_size))]
     checked = []
@@ -147,7 +147,13 @@ def main():
         and bool(x.get("Used Inventory URL") or dict(rows)[int(x["Sheet Row"])].get("Used Inventory URL"))
         and not (dict(rows)[int(x["Sheet Row"])].get("New Inventory URL") and dict(rows)[int(x["Sheet Row"])].get("Used Inventory URL"))
         for x in by_row.values())
+    unique_checked = len(history)
+    never_checked = sum(number not in history for number, _ in rows)
     summary = {
+        "unique_dealerships_checked_before_run": unique_checked,
+        "unique_dealerships_checked_total": len(set(history) | {r.number for r in checked}),
+        "never_checked_remaining": max(0, never_checked - sum(r.number not in history for r in checked)),
+        "directory_coverage_percent": round(100 * len(set(history) | {r.number for r in checked}) / len(rows), 2),
         "last_run_utc": now.isoformat(timespec="seconds"),
         "total_dealerships": len(rows),
         "checked_this_run": len(checked),
@@ -163,6 +169,7 @@ def main():
         "contact_forms_total": sum(bool(x.get("Contact Form URL")) for x in contacts.values()),
         "contact_emails_found_this_run": sum(bool(x.contact_email) for x in checked),
         "remaining_to_research": len(todo) - len(selected),
+        "blocked_or_restricted_this_run": sum(r.status in {"robots_blocked", "homepage_blocked", "homepage_rate_limited", "robots_rate_limited"} for r in checked),
         "status_counts": dict(Counter(r.status for r in checked)),
         "note": "URLs collected in GitHub results/discoveries.csv; Google Sheet not automatically synced."
     }
@@ -178,6 +185,9 @@ def main():
         f"- Lease specials URLs: **{lease_count:,}**\n"
         f"- Dealerships checked this run: **{len(checked)}**\n"
         f"- Total checks logged: **{len(audit):,}**\n"
+        f"- Unique dealerships researched: **{summary['unique_dealerships_checked_total']:,}** ({summary['directory_coverage_percent']}%)\n"
+        f"- Never checked remaining: **{summary['never_checked_remaining']:,}**\n"
+        f"- Public emails: **{summary['contact_emails_total']:,}**; contact forms: **{summary['contact_forms_total']:,}**\n"
         f"- New links found this run: **{count_new}**\n"
         f"- Used links found this run: **{count_used}**\n"
         f"- Lease specials links found this run: **{count_lease}**\n\n"

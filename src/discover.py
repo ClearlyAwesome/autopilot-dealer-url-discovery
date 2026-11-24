@@ -309,9 +309,9 @@ class Result:
                 self.lease, self.lease_evidence, self.checked]
 
 
-EMAIL_RE = re.compile(r"(?<![\\w.+-])[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}(?![\\w.-])", re.I)
+EMAIL_RE = re.compile(r"(?<![\w.+-])[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}(?![\w.-])", re.I)
 CONTACT_RE = re.compile(r"contact|staff|team|internet.sales|sales.department", re.I)
-BAD_EMAIL = re.compile(r"(?:example\\.|test\\.|wix\\.|sentry\\.|cloudflare\\.|wordpress\\.|noreply|no-reply|privacy|support@|webmaster@|png|jpg|jpeg|svg)", re.I)
+BAD_EMAIL = re.compile(r"^(?:no[-_]?reply|privacy|support|webmaster)@|@(?:example|test|wix|sentry|cloudflare|wordpress)\.|(?:\.(?:png|jpg|jpeg|svg))$", re.I)
 
 def public_contacts(html, base):
     soup = BeautifulSoup(html[:350000], "html.parser")
